@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     integrations:
-      app_store_connect: FieldProof 360 Pro
+      app_store_connect: Fieldproof 360 Pro
     environment:
       groups:
         - fieldproof_secrets
