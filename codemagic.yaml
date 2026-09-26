@@ -15,7 +15,6 @@ workflows:
         APP_ENV: production
       flutter: stable
       xcode: latest
-      cocoapods: default
     scripts:
       - name: Get Flutter packages
         script: flutter pub get
