@@ -1,0 +1,43 @@
+workflows:
+  ios-production:
+    name: FieldProof 360 Pro iOS Production
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: FieldProof 360 Pro
+    environment:
+      groups:
+        - fieldproof_secrets
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.benattech.fieldproof
+      vars:
+        APP_ENV: production
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Generate code
+        script: dart run build_runner build --delete-conflicting-outputs
+      - name: Analyze Flutter project
+        script: flutter analyze
+      - name: Run Flutter tests
+        script: flutter test
+      - name: Apply iOS signing profiles
+        script: xcode-project use-profiles
+      - name: Build App Store IPA
+        script: |
+          flutter build ipa --release \
+            --build-name=1.0.0 \
+            --build-number=$PROJECT_BUILD_NUMBER \
+            --dart-define=APP_ENV=$APP_ENV \
+            --dart-define=REVENUECAT_APPLE_KEY=$REVENUECAT_APPLE_KEY \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
