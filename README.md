@@ -1,211 +1,312 @@
 # FieldProof 360 Pro
 
-FieldProof 360 Pro is a mobile-first field and service report application for Android
-and iOS. Phase 8 adds professional, snapshot-driven A4 PDF generation, in-app
-preview, app-owned PDF exports, and native Android/iOS sharing for finalized reports. Report content, photos, materials,
-and signatures remain local and available offline.
 
-## Requirements
+**Proof of work. Professionally.**
 
-- Flutter 3.44.8 or a compatible stable release
-- Dart 3.12.2 or a compatible release
-- Android Studio and the Android SDK for Android development
-- Xcode on macOS for iOS development
+FieldProof 360 Pro is an offline-first mobile application for technicians, field-service professionals and small service businesses to document completed work and produce professional customer reports.
 
-## Setup
+The app is built with Flutter for Android and iOS and is designed to keep core field workflows available even when internet connectivity is unreliable.
 
-```bash
-flutter pub get
-dart run build_runner build
-flutter run
-```
+## What FieldProof Does
 
-For continuous code generation during development:
+- Customer management
+- Field and service reports
+- Draft autosaving
+- Equipment and site details
+- Work-performed documentation
+- Materials tracking
+- Photo evidence
+- Technician and customer signatures
+- Professional PDF reports
+- Native report sharing
+- Offline-first storage
+- Subscription-based Pro features
 
-```bash
-dart run build_runner watch
-```
+## Typical Workflow
 
-## Configuration
+1. Create or select a customer.
+2. Start a new service report.
+3. Record the reported issue and equipment details.
+4. Document diagnosis and work completed.
+5. Add materials used.
+6. Capture supporting photos.
+7. Collect technician or customer signatures.
+8. Finalize the report.
+9. Generate a professional PDF.
+10. Share the report through WhatsApp, email, Drive, AirDrop or another installed application.
 
-The app defaults to the development environment. Configuration values can be
-supplied with Dart defines when needed:
+Finalized reports are preserved as immutable snapshots so later edits to customer or business information do not change previously issued documents.
 
-```bash
-flutter run \
-  --dart-define=APP_ENV=development \
-  --dart-define=REVENUECAT_APPLE_KEY=<apple-public-sdk-key> \
-  --dart-define=REVENUECAT_GOOGLE_KEY=<google-public-sdk-key>
-```
+## Offline-First Architecture
 
-Phase 9 integrates RevenueCat through `purchases_flutter`. FieldProof uses anonymous RevenueCat customer IDs in V1 because the app still has no account/authentication system. Only RevenueCat public SDK keys belong in the app build; never add RevenueCat secret API keys, App Store Connect private keys, or Google service-account credentials to source control.
+FieldProof 360 Pro is designed around local persistence.
 
-Configure RevenueCat with:
+Core report data is stored in a local Drift/SQLite database, including:
 
-- entitlement: `pro`
-- Apple monthly product: `fieldproof_pro_monthly`
-- Apple yearly product: `fieldproof_pro_yearly`
-- Google monthly product: `fieldproof_pro_monthly`
-- Google yearly product: `fieldproof_pro_yearly`
-- a Current Offering containing RevenueCat Monthly and Annual packages mapped to those store products
+- business profile
+- customers
+- reports
+- materials
+- photo metadata
+- signatures
+- application settings
+- usage counters
 
-Run a configured build with the public SDK keys supplied by your shell or CI
-environment. Do not add the key values to source files:
+Report photos and signature files are stored in application-owned local storage rather than database blobs.
 
-```bash
-flutter run \
-  --dart-define=APP_ENV=development \
-  --dart-define=REVENUECAT_APPLE_KEY=appl_YOUR_PUBLIC_KEY \
-  --dart-define=REVENUECAT_GOOGLE_KEY=goog_YOUR_PUBLIC_KEY
-```
+This means reports can be created, edited and viewed without a network connection.
 
-If the RevenueCat key for the current platform is absent, subscriptions show as unconfigured and the free-report quota is intentionally not enforced. This keeps local development usable before store products are configured.
+## Report Lifecycle
 
-## Quality checks
+Reports begin as editable drafts.
 
-```bash
-dart format --output=none --set-exit-if-changed .
-flutter analyze
-flutter test
-```
+Drafts:
 
-## Application identity
+- autosave locally
+- can be associated with customers
+- support photos, materials and signatures
+- remain editable until finalization
 
-- Android application ID and namespace: `com.benattech.fieldproof`
-- iOS bundle identifier: `com.benattech.fieldproof`
+Finalized reports:
+
+- receive a permanent report number
+- become read-only
+- store a versioned snapshot of their contents
+- can be reproduced later as PDFs
+- can be duplicated into new drafts
+
+This helps preserve the integrity of documents that have already been issued to customers.
+
+## PDF Generation
+
+FieldProof generates professional A4 service reports from finalized report snapshots.
+
+A report can include:
+
+- business identity
+- report number
+- customer details
+- site information
+- equipment details
+- reported issue
+- diagnosis
+- work performed
+- recommendations
+- materials used
+- categorized photos
+- signatures
+- terms
+- page numbering
+
+PDF generation uses the immutable finalized snapshot rather than current customer or business records.
+
+## Sharing
+
+Generated reports can be shared through the native Android or iOS share sheet.
+
+Depending on installed applications, users can share through services such as:
+
+- WhatsApp
+- email
+- Google Drive
+- Files
+- Messages
+- AirDrop
+
+Generated files are stored in application-owned report export directories.
+
+## Subscription Model
+
+FieldProof 360 Pro integrates RevenueCat for subscription management.
+
+The application uses a `pro` entitlement with monthly and yearly subscription products.
+
+Free users can work with the core product while configured usage limits apply to finalized reports.
+
+Active Pro subscribers receive expanded report access and Pro PDF behavior.
+
+RevenueCat public SDK keys are supplied through build configuration. Secret RevenueCat API keys, App Store Connect private keys and Google service-account credentials must never be included in application source code.
+
+## Technology
+
+### Mobile
+
+- Flutter
+- Dart
+- Material 3
+
+### State and Navigation
+
+- Riverpod
+- go_router
+
+### Local Data
+
+- Drift
+- SQLite
+
+### Reports
+
+- pdf
+- printing
+- share_plus
+- cross_file
+
+### Media
+
+- image_picker
+- application-owned local file storage
+
+### Subscriptions
+
+- RevenueCat
+- Apple StoreKit
+- Google Play Billing
 
 ## Architecture
 
-Application setup, routing, and themes live under `lib/app`. Shared errors and
-widgets live under `lib/core`. Drift infrastructure lives under `lib/data`.
-Product code is grouped feature-first under `lib/features`, with data, domain,
-and presentation layers added only when a phase needs them.
+The Flutter codebase follows a feature-oriented structure.
 
-Riverpod provides state and dependency injection. `go_router` directs a fresh
-installation to onboarding and a configured installation to the persistent
-`StatefulShellRoute`. Material 3 themes support system, light, and dark modes.
+`lib/app/`  
+Application bootstrap, routing and themes.
 
-The Drift schema is version 7. It contains internal database metadata,
-`business_profiles`, `app_settings_entries`, `customers`, `reports`,
-`report_photos`, `report_materials`, `report_signatures`, and `usage_counters`.
-Sequential, non-destructive migrations preserve existing data. The reports
-table supports incomplete drafts and immutable finalized reports. Finalization
-requires a business/technician identity, report title, and completed work; it
-assigns a permanent `PREFIX-YYYY-0001` style number transactionally and stores a
-versioned JSON snapshot containing the report, business, customer, equipment,
-materials, photos, signatures, and selected PDF template. Report persistence
-is exposed through `ReportRepository` and remains fully local and offline.
-Reports can be created, viewed, and edited while offline. Draft edits autosave
-locally and are flushed when leaving the editor or when the app backgrounds.
-Report photos are copied out of camera/gallery temporary locations into
-FieldProof-owned application support storage, with generated thumbnails when the
-image format is supported by the local decoder. Photo metadata remains in Drift.
-Photo changes also update the parent report timestamp so recent-report ordering stays accurate.
-Materials are report-scoped rows with quantity, unit, notes, and explicit ordering.
-Technician and customer signatures are captured in Flutter, stored as app-owned
-PNG files under each report, and referenced from Drift. Replacing a signature
-writes the new file before removing the previous file.
+`lib/core/`  
+Shared errors, utilities and reusable UI components.
 
-Phase 6 tracks monthly finalized-report usage locally. Phase 9 now connects that
-usage to RevenueCat: configured Free users are limited to three finalized reports
-per calendar month, while active `pro` subscribers are unlimited. Finalized reports
-are read-only; the UI can duplicate them
-as new drafts, including report-owned materials, photos, and signatures.
-Business/customer edits made after finalization do not alter the frozen snapshot.
+`lib/data/`  
+Database and persistence infrastructure.
 
-Onboarding stores the business profile and completion flag in one database
-transaction. Business details can be edited from Settings. Theme selection is
-stored in application settings and restored on the next launch. All Phase 1
-data remains local and works offline.
+`lib/features/`  
+Feature-specific data, domain and presentation layers.
 
-Customers can be created, viewed, searched, edited, and soft-archived. Active
-lists and search exclude archived customers. Repository restoration support is
-implemented and tested; an archived-customer management screen is deferred to a
-later phase. Customer data is stored only in the local Drift database and
-survives application restarts.
+Riverpod provides application state and dependency injection.
 
+`go_router` manages onboarding and the persistent application navigation shell.
 
-## PDF generation and sharing
+Drift handles local persistence and non-destructive schema migrations.
 
-Phase 7 added `pdf` and `printing`. Phase 8 adds `share_plus` and `cross_file` for explicit native sharing. The PDF engine consumes the immutable
-`ReportSnapshot`, never live customer/business tables, so an issued report can
-be reproduced after later profile edits. The classic A4 template includes
-business identity, report number, customer/site/equipment details, reported
-issue, diagnosis, work performed, recommendations, materials, categorized
-photos, signatures, terms, page numbering, and the Free-plan FieldProof footer.
-Internal notes are intentionally excluded from customer PDFs.
+## Responsive UI
 
-Finalized report details expose **Preview PDF** and **Share PDF**. Sharing first
-regenerates the PDF into app-owned report storage under `reports/<id>/exports/`,
-then opens the platform share sheet so the user can choose WhatsApp, email, Drive,
-AirDrop, Messages, Files, or any other installed compatible target. The preview
-screen also exposes a dedicated share action. Stale PDF exports for the same report
-are cleaned up best-effort. Drafts must be finalized before an official PDF can be
-generated. Phase 9 connects that access-policy layer to the RevenueCat `pro` entitlement. Free users can finalize up to three reports per calendar month; active Pro users can finalize without that limit and PDFs are generated/shared without the `Created with FieldProof` footer. Subscription status is checked through RevenueCat CustomerInfo, which normally uses the SDK's local cache when current data is available. Users can explicitly restore purchases and open their Apple/Google subscription-management URL from Settings.
+FieldProof supports compact and larger mobile layouts.
 
-The iOS Podfile enables `use_frameworks!` as required by the `printing` plugin.
-After adding/updating dependencies, run `flutter pub get` before CocoaPods or an
-iOS CI build.
+The interface includes:
 
-## Local report file storage
+- bottom navigation on phones
+- navigation rail layouts on wider screens
+- responsive content widths
+- loading, empty and error states
+- light and dark themes
+- accessible touch targets and labels
 
-Report photos are stored under the application support directory in a per-report
-folder. SQLite stores only paths, categories, captions, ordering, and timestamps;
-image bytes are not stored as database blobs. Signature PNGs are stored under the
-report `signatures/` directory using the same app-owned storage strategy. The iOS
-project includes camera and photo-library usage descriptions. Android uses the
-platform integration provided by `image_picker`.
+## Privacy Approach
 
-## Phase 9 subscriptions
+The current application architecture keeps customer and report information primarily on the user's device.
 
-The subscription implementation deliberately uses the base `purchases_flutter` SDK and a FieldProof-native paywall instead of `purchases_ui_flutter`. This preserves the existing iOS 13 and Android 21+ deployment range while still using Apple StoreKit / Google Play Billing through RevenueCat.
+Core field data does not require a cloud account or backend to function.
 
-The subscription screen is available at **Settings → FieldProof 360 Pro** and shows store-localized prices from the current RevenueCat Offering. Purchase cancellation is treated as a normal user action rather than an error. Restore Purchases is only triggered from explicit user interaction. Active subscribers can open the RevenueCat-provided store management URL.
+This provides:
 
-Before store release:
+- offline availability
+- reduced dependency on network connectivity
+- simple local ownership of job records
+- fewer external systems handling customer field data
 
-1. Create the FieldProof project in RevenueCat.
-2. Add the iOS app with bundle ID `com.benattech.fieldproof`.
-3. Add the Android app with package `com.benattech.fieldproof`.
-4. Create the `pro` entitlement.
-5. Attach `fieldproof_pro_monthly` and `fieldproof_pro_yearly` products from both stores.
-6. Create/set a Current Offering with Monthly and Annual packages.
-7. Add the public RevenueCat Apple/Google SDK keys to your CI/build environment.
-8. Enable/configure In-App Purchases in App Store Connect and subscriptions in Google Play Console.
-9. Test purchase, renewal, cancellation, restore, and expiry using sandbox/test accounts before production submission.
+Third-party subscription processing is handled through the platform stores and RevenueCat.
 
-After pulling Phase 9 changes, resolve dependencies and regenerate Riverpod code:
+## Application Identity
 
-```bash
-flutter pub get
-dart run build_runner build
-dart format .
-flutter analyze
-flutter test
-flutter build apk --debug
-```
+Android package:
 
+`com.benattech.fieldproof`
 
+iOS bundle identifier:
 
-## Phase 10 — Production polish
+`com.benattech.fieldproof`
 
-Phase 10 focuses on production UX rather than new product scope.
+## Local Development
 
-Implemented:
+### Requirements
 
-- Adaptive navigation: bottom navigation on phones and NavigationRail on wider layouts
-- Responsive content widths for key dashboard, reports, customers, and settings surfaces
-- Consistent loading, empty, and error-state components
-- Refined Material 3 theme, buttons, cards, search, dialogs, and snackbars
-- Home dashboard with quick actions, workspace counts, plan status, and recent reports
-- Improved onboarding with clear product benefits and privacy reassurance
-- In-app workflow help and V1 local-data explanation
-- Branded Android/iOS launch backgrounds
-- Accessibility-oriented labels, larger touch targets, and status text that does not rely on color alone
-- Responsive widget tests for compact and wide layouts
+- Flutter stable
+- Dart
+- Android Studio / Android SDK for Android development
+- Xcode for local iOS development on macOS
 
-The database schema remains version 7. Phase 10 adds no backend, authentication, or cloud-sync requirement.
+Install dependencies:
 
-### Branding note
+`flutter pub get`
 
-Phase 10.5 introduces the FieldProof 360 Pro logo/app icon, branded native launch screens, and a lightweight animated Flutter intro. See `docs/BRANDING_ASSETS.md`.
+Generate code:
+
+`dart run build_runner build`
+
+Run the application:
+
+`flutter run`
+
+For continuous code generation:
+
+`dart run build_runner watch`
+
+## RevenueCat Configuration
+
+Public SDK keys should be provided through Dart defines or CI configuration.
+
+Example:
+
+`--dart-define=REVENUECAT_APPLE_KEY=appl_YOUR_PUBLIC_KEY`
+
+`--dart-define=REVENUECAT_GOOGLE_KEY=goog_YOUR_PUBLIC_KEY`
+
+The project expects a RevenueCat entitlement named:
+
+`pro`
+
+with monthly and annual store products configured for the supported platforms.
+
+## Quality Checks
+
+Run formatting checks:
+
+`dart format --output=none --set-exit-if-changed .`
+
+Run static analysis:
+
+`flutter analyze`
+
+Run automated tests:
+
+`flutter test`
+
+## Branding
+
+FieldProof 360 Pro uses the tagline:
+
+**Proof of work. Professionally.**
+
+The project includes branded application icons, launch screens and an animated Flutter introduction.
+
+Additional branding information is available in:
+
+`docs/BRANDING_ASSETS.md`
+
+## Project Documentation
+
+More detailed implementation and development history is maintained separately from this front-page overview.
+
+See:
+
+- `FIELDPROOF.md`
+- `docs/`
+
+## Project Status
+
+FieldProof 360 Pro is a production-oriented Flutter application with Android and iOS targets.
+
+The current codebase includes the complete offline reporting workflow, PDF generation and sharing, subscription infrastructure, production UI polish, legal/support surfaces and release-preparation work.
+
+## Product Goal
+
+FieldProof 360 Pro is designed to give technicians and field-service professionals a simple way to turn everyday service work into organized, professional proof of work.
+
+Instead of relying on paper notes, scattered photos and informal messages, a technician can create a structured record and deliver a professional report from the same mobile device used in the field.
